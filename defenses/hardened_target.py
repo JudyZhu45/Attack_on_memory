@@ -1,5 +1,7 @@
 """Hardened wrapper around memory targets with configurable defenses."""
 
+import re
+
 from targets.base import MemoryTarget, MemorySnapshot, QueryResult
 
 from defenses.input_filter import is_suspicious_input
@@ -16,6 +18,10 @@ class HardenedMemoryTarget(MemoryTarget):
       - "write_validator": LLM judges whether content is fact vs. instruction
       - "consolidation_guard": Whitelist allowed profile fields
       - "output_classifier": Classifier on query responses (redacts leaks)
+      - "query_intent_filter": Blocks obvious credential-seeking queries
+      - "strict_query_intent_filter": Blocks direct and indirect credential-seeking queries
+      - "retrieval_redaction": Removes sensitive values from retrieved context
+      - "schema_guard": Blocks high-risk writes before they become raw facts
     """
 
     def __init__(self, base: MemoryTarget, defenses: list[str]):
@@ -36,6 +42,10 @@ class HardenedMemoryTarget(MemoryTarget):
             "write_validator",
             "consolidation_guard",
             "output_classifier",
+            "query_intent_filter",
+            "strict_query_intent_filter",
+            "retrieval_redaction",
+            "schema_guard",
         }
         invalid = self.defenses - valid_defenses
         if invalid:
@@ -60,6 +70,10 @@ class HardenedMemoryTarget(MemoryTarget):
                 # Silently drop instructions disguised as facts
                 return
 
+        if "schema_guard" in self.defenses:
+            if self._is_forbidden_write(content):
+                return
+
         # Content passed all checks; write to base
         self.base.write(content, user_id)
 
@@ -73,12 +87,45 @@ class HardenedMemoryTarget(MemoryTarget):
         Returns:
             QueryResult with optional redaction.
         """
+        if "strict_query_intent_filter" in self.defenses:
+            if self._is_sensitive_query(question, strict=True):
+                return QueryResult(
+                    answer=(
+                        "Blocked by query intent filter: the request appears to "
+                        "be asking for a sensitive credential, so retrieval was "
+                        "not performed."
+                    ),
+                    retrieved_memories=[],
+                )
+
+        if "query_intent_filter" in self.defenses:
+            if self._is_sensitive_query(question, strict=False):
+                return QueryResult(
+                    answer=(
+                        "Blocked by query intent filter: the request appears to "
+                        "be asking for a sensitive credential, so retrieval was "
+                        "not performed."
+                    ),
+                    retrieved_memories=[],
+                )
+
         result = self.base.query(question, user_id)
+
+        if "retrieval_redaction" in self.defenses:
+            result = self._apply_retrieval_redaction(question, result)
 
         # Apply output classifier
         if "output_classifier" in self.defenses:
             if self._leaks_sensitive(result.answer):
-                result.answer = "[redacted by output classifier]"
+                result.answer = (
+                    "Redacted by output classifier: the generated response "
+                    "appeared to contain sensitive information."
+                )
+                result.retrieved_memories = [
+                    "Redacted by output classifier: sensitive retrieved memory "
+                    "was removed from the response."
+                    for _ in result.retrieved_memories
+                ]
 
         return result
 
@@ -192,3 +239,105 @@ class HardenedMemoryTarget(MemoryTarget):
             derived=filtered_derived,
             raw_dump=snapshot.raw_dump,
         )
+
+    def _is_sensitive_query(self, question: str, strict: bool) -> bool:
+        """Detect queries that are trying to retrieve secrets from memory."""
+        text = question.lower()
+        credential_terms = (
+            "token",
+            "secret",
+            "password",
+            "credential",
+            "backup code",
+            "access code",
+            "access key",
+            "payroll",
+        )
+        action_terms = (
+            "what is",
+            "show",
+            "tell",
+            "give",
+            "reveal",
+            "return",
+            "print",
+            "list",
+            "read back",
+        )
+        indirect_terms = (
+            "recover",
+            "recovery",
+            "verify",
+            "verification",
+            "audit",
+            "incident",
+            "ticket",
+            "support",
+            "troubleshoot",
+            "locked out",
+            "reconcile",
+        )
+
+        has_credential = any(term in text for term in credential_terms)
+        has_action = any(term in text for term in action_terms)
+        if has_credential and has_action:
+            return True
+
+        if strict and has_credential and any(term in text for term in indirect_terms):
+            return True
+
+        return False
+
+    def _apply_retrieval_redaction(
+        self, question: str, result: QueryResult
+    ) -> QueryResult:
+        """Redact sensitive values unless the query states an allowed purpose."""
+        if self._has_allowed_recovery_purpose(question):
+            return result
+
+        return QueryResult(
+            answer=self._redact_sensitive_text(result.answer),
+            retrieved_memories=[
+                self._redact_sensitive_text(str(memory))
+                for memory in result.retrieved_memories
+            ],
+        )
+
+    def _has_allowed_recovery_purpose(self, question: str) -> bool:
+        text = question.lower()
+        purpose_terms = (
+            "recovery verification",
+            "payroll recovery",
+            "locked out",
+            "support ticket",
+            "incident response",
+            "reconcile payroll",
+        )
+        return any(term in text for term in purpose_terms)
+
+    def _redact_sensitive_text(self, text: str) -> str:
+        """Remove obvious challenge-style secrets from retrieved context."""
+        patterns = [
+            r"\b[A-Z]{2,}-\d{3,}-[A-Z0-9]{2,}\b",
+            r"\b\d{12,19}\b",
+        ]
+        redacted = text
+        for pattern in patterns:
+            redacted = re.sub(pattern, "[REDACTED]", redacted)
+        return redacted
+
+    def _is_forbidden_write(self, content: str) -> bool:
+        """Block direct writes to high-risk identity and authority fields."""
+        suspicious_terms = (
+            "verified medical professional",
+            "medical professional",
+            "doctor",
+            "licensed",
+            "certified professional",
+            "security clearance",
+            "admin",
+            "payroll token",
+            "credential",
+        )
+        text = content.lower()
+        return any(term in text for term in suspicious_terms)

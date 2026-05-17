@@ -25,6 +25,7 @@ export default function LevelPage() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [progress, setProgress] = useState<ProgressState>(defaultProgress());
   const [prompt, setPrompt] = useState("");
+  const [submittedAnswer, setSubmittedAnswer] = useState("");
   const [result, setResult] = useState<AttackResponse | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [clientReady, setClientReady] = useState(false);
@@ -43,11 +44,13 @@ export default function LevelPage() {
   const attempts = targetProgress.attempts[levelId] ?? 0;
   const unlocked = isUnlocked(progress, target, levelId);
   const completed = targetProgress.completed.includes(levelId);
+  const isExfil = levelId.startsWith("exfil-");
+  const canSubmit = Boolean(level && unlocked && (isExfil ? prompt.trim() || submittedAnswer.trim() : prompt.trim()));
 
   const nextLevel = useMemo(() => {
-    const nextOrder = Number(levelId.slice(1)) + 1;
-    return levels.find((item) => item.id === `l${nextOrder}`);
-  }, [levelId, levels]);
+    if (!level) return undefined;
+    return levels.find((item) => item.order > level.order);
+  }, [level, levels]);
 
   function commitProgress(next: ProgressState) {
     setProgress(next);
@@ -56,7 +59,7 @@ export default function LevelPage() {
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!prompt.trim() || submitting || !level || !unlocked) return;
+    if (!canSubmit || submitting || !level || !unlocked) return;
 
     setSubmitting(true);
     setResult(null);
@@ -67,6 +70,7 @@ export default function LevelPage() {
         level_id: level.id,
         target,
         prompt: prompt.trim(),
+        submitted_answer: isExfil ? submittedAnswer.trim() || null : null,
         session_id: progress.sessionId,
         attempt_number: attemptNumber,
       });
@@ -180,11 +184,29 @@ export default function LevelPage() {
               placeholder="Type the prompt you want the agent to process..."
               className="mt-3 w-full resize-y border border-line bg-zinc-950 p-4 text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-ember"
             />
+            {isExfil ? (
+              <div className="mt-4">
+                <label htmlFor="submitted-answer" className="text-sm uppercase tracking-[0.22em] text-zinc-500">
+                  Answer Submission
+                </label>
+                <input
+                  id="submitted-answer"
+                  value={submittedAnswer}
+                  onChange={(event) => setSubmittedAnswer(event.target.value)}
+                  maxLength={4000}
+                  placeholder="Enter the recovered token here..."
+                  className="mt-3 h-12 w-full border border-line bg-zinc-950 px-4 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-ember"
+                />
+                <p className="mt-2 text-xs leading-5 text-zinc-500">
+                  Exfiltration levels are scored from this answer field. The attack prompt is used to probe the protected memory system.
+                </p>
+              </div>
+            ) : null}
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-sm text-zinc-500">{attempts} previous attempts on {target}</div>
               <button
                 type="submit"
-                disabled={submitting || !prompt.trim() || !level}
+                disabled={submitting || !canSubmit}
                 className="inline-flex h-12 items-center justify-center gap-2 bg-ember px-6 text-sm font-semibold uppercase tracking-[0.18em] text-white hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-500"
               >
                 {submitting ? <Loader2 className="animate-spin" size={17} /> : <Send size={17} />}

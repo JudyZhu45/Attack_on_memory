@@ -59,7 +59,7 @@ export default function HomePage() {
               </div>
               <h1 className="max-w-3xl text-4xl font-semibold text-zinc-50 md:text-5xl">Break the agent before it remembers too much.</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">
-                Pick a live memory backend, clear five attacks, and unlock the next breach by satisfying each hidden win condition.
+                Pick a live memory backend and clear two escalating defense tracks: leakage and injection.
               </p>
             </div>
             <div className="grid grid-cols-2 border border-line">
@@ -118,7 +118,7 @@ export default function HomePage() {
             <div className="text-sm uppercase tracking-[0.22em] text-zinc-500">Operator</div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="border border-line bg-zinc-950 p-3">
-                <div className="text-2xl font-semibold text-zinc-100">{targetProgress.completed.length}/5</div>
+                <div className="text-2xl font-semibold text-zinc-100">{targetProgress.completed.length}/{levels.length}</div>
                 <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">Cleared</div>
               </div>
               <div className="border border-line bg-zinc-950 p-3">
@@ -149,7 +149,7 @@ export default function HomePage() {
             Reset Local Progress
           </button>
 
-          <Link href={levels.length ? `/levels/${levels.find((level) => isUnlocked(progress, progress.selectedTarget, level.id) && !targetProgress.completed.includes(level.id))?.id ?? "l1"}` : "#"} className="flex h-12 items-center justify-center gap-2 bg-ember text-sm font-semibold uppercase tracking-[0.18em] text-white hover:bg-red-500">
+          <Link href={levels.length ? `/levels/${levels.find((level) => isUnlocked(progress, progress.selectedTarget, level.id) && !targetProgress.completed.includes(level.id))?.id ?? "exfil-1"}` : "#"} className="flex h-12 items-center justify-center gap-2 bg-ember text-sm font-semibold uppercase tracking-[0.18em] text-white hover:bg-red-500">
             <Play size={17} />
             Continue
           </Link>

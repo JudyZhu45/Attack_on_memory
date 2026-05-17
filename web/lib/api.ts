@@ -25,6 +25,7 @@ export type AttackRequest = {
   level_id: string;
   target: TargetName;
   prompt: string;
+  submitted_answer?: string | null;
   session_id: string;
   attempt_number: number;
 };

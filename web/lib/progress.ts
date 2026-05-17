@@ -60,17 +60,31 @@ export function levelScore(attemptNumber: number): number {
   return Math.max(20, 100 - (attemptNumber - 1) * 15);
 }
 
+function previousLevelId(levelId: string): string | null {
+  const match = /^(exfil|poison)-(\d+)$/.exec(levelId);
+  if (!match) {
+    return null;
+  }
+
+  const tier = Number(match[2]);
+  if (!Number.isFinite(tier) || tier <= 1) {
+    return null;
+  }
+
+  return `${match[1]}-${tier - 1}`;
+}
+
 export function isUnlocked(progress: ProgressState, target: TargetName, levelId: string): boolean {
-  if (progress.practiceMode || levelId === "l1") {
+  if (progress.practiceMode) {
     return true;
   }
 
-  const previousOrder = Number(levelId.slice(1)) - 1;
-  if (!Number.isFinite(previousOrder) || previousOrder < 1) {
-    return false;
+  const previous = previousLevelId(levelId);
+  if (!previous) {
+    return true;
   }
 
-  return progress.targets[target].completed.includes(`l${previousOrder}`);
+  return progress.targets[target].completed.includes(previous);
 }
 
 export function loadProgress(): ProgressState {

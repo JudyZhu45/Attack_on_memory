@@ -43,8 +43,10 @@ class AttackRunner:
         # Setup: inject initial state
         level.setup(self.target, user_id)
 
-        # Execute attack: submit the reference attack prompt
-        self.target.write(level.reference_attack, user_id)
+        # Execute attack: leakage levels only query preloaded memory; poisoning
+        # levels write the attacker prompt into memory before judging.
+        if level.attack_type == "poisoning":
+            self.target.write(level.reference_attack, user_id)
 
         # Trigger consolidation if applicable
         self.target.trigger_consolidation(user_id)
@@ -75,8 +77,10 @@ class AttackRunner:
         # Setup: inject initial state
         level.setup(self.target, user_id)
 
-        # Execute attack: submit custom prompt
-        self.target.write(prompt, user_id)
+        # Execute attack: leakage levels only query preloaded memory; poisoning
+        # levels write the attacker prompt into memory before judging.
+        if level.attack_type == "poisoning":
+            self.target.write(prompt, user_id)
 
         # Trigger consolidation if applicable
         self.target.trigger_consolidation(user_id)

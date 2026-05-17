@@ -1,14 +1,21 @@
 """Write validation to distinguish facts from instructions."""
 
 import os
+import re
 
-from anthropic import Anthropic
+from openai import OpenAI
+
+INSTRUCTION_RE = re.compile(
+    r"\b(ignore|override|forget|delete|overwrite|must remember|store this|"
+    r"treat this as|from now on|system should|you must)\b",
+    re.IGNORECASE,
+)
 
 
 def is_genuine_fact(content: str) -> bool:
     """Classify whether content is a genuine fact vs. a hidden instruction.
 
-    Uses Claude Haiku to evaluate if the content is a statement the user
+    Uses OpenAI to evaluate if the content is a statement the user
     wants remembered (a fact) vs. an instruction trying to manipulate the
     memory system's behavior.
 
@@ -18,11 +25,14 @@ def is_genuine_fact(content: str) -> bool:
     Returns:
         True if the content is a genuine fact, False if it looks like instruction.
     """
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-    if not api_key:
-        raise ValueError("ANTHROPIC_API_KEY not set")
+    if _heuristic_instruction_check(content):
+        return False
 
-    client = Anthropic(api_key=api_key)
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return True
+
+    client = OpenAI(api_key=api_key)
 
     prompt = f"""Classify the following content as either "fact" or "instruction".
 
@@ -44,11 +54,29 @@ Guidelines for "instruction":
 
 Respond with ONLY "fact" or "instruction" (lowercase, no punctuation)."""
 
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=10,
-        messages=[{"role": "user", "content": prompt}],
-    )
+    try:
+        completion = client.chat.completions.create(
+            model=os.getenv("AGENT_MEMORY_CTF_CLASSIFIER_MODEL", "gpt-4o-mini"),
+            max_tokens=10,
+            temperature=0,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a strict binary security classifier.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+    except Exception:
+        return True
 
-    response = message.content[0].text.strip().lower()
+    response = (completion.choices[0].message.content or "").strip().lower()
     return response == "fact"
+
+
+def _heuristic_instruction_check(content: str) -> bool:
+    """Reject obvious memory-control instructions before calling the model."""
+    if not content:
+        return False
+
+    return bool(INSTRUCTION_RE.search(content))

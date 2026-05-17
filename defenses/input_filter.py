@@ -1,14 +1,26 @@
 """Input filtering for suspicious content."""
 
 import os
+import re
 
-from anthropic import Anthropic
+from openai import OpenAI
+
+MEMORY_ATTACK_RE = re.compile(
+    r"\b(ignore|override|forget|delete|overwrite|must remember|store this|"
+    r"treat this as|system prompt|developer message|jailbreak)\b",
+    re.IGNORECASE,
+)
+SECRET_QUERY_RE = re.compile(
+    r"\b(reveal|show|print|give me|tell me|return|list)\b.*"
+    r"\b(token|secret|password|credential|backup code|access code)\b",
+    re.IGNORECASE | re.DOTALL,
+)
 
 
 def is_suspicious_input(content: str) -> bool:
     """Classify whether input content is suspicious (injection attack).
 
-    Uses Claude Haiku to quickly evaluate if the content looks like an
+    Uses OpenAI to quickly evaluate if the content looks like an
     attack prompt rather than a genuine user message.
 
     Args:
@@ -17,11 +29,14 @@ def is_suspicious_input(content: str) -> bool:
     Returns:
         True if suspicious, False if safe.
     """
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-    if not api_key:
-        raise ValueError("ANTHROPIC_API_KEY not set")
+    if _heuristic_suspicious_check(content):
+        return True
 
-    client = Anthropic(api_key=api_key)
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return False
+
+    client = OpenAI(api_key=api_key)
 
     prompt = f"""Classify the following user input as either "safe" or "suspicious".
 
@@ -42,11 +57,29 @@ Guidelines for "safe":
 
 Respond with ONLY "safe" or "suspicious" (lowercase, no punctuation)."""
 
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=10,
-        messages=[{"role": "user", "content": prompt}],
-    )
+    try:
+        completion = client.chat.completions.create(
+            model=os.getenv("AGENT_MEMORY_CTF_CLASSIFIER_MODEL", "gpt-4o-mini"),
+            max_tokens=10,
+            temperature=0,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a strict binary security classifier.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+    except Exception:
+        return False
 
-    response = message.content[0].text.strip().lower()
+    response = (completion.choices[0].message.content or "").strip().lower()
     return response == "suspicious"
+
+
+def _heuristic_suspicious_check(content: str) -> bool:
+    """Cheap local screen for obvious prompt-injection and secret requests."""
+    if not content:
+        return False
+
+    return bool(MEMORY_ATTACK_RE.search(content) or SECRET_QUERY_RE.search(content))
