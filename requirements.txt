@@ -1,0 +1,10 @@
+anthropic>=0.40
+fastapi
+httpx
+matplotlib
+mem0ai
+numpy
+pandas
+pydantic>=2
+python-dotenv
+uvicorn[standard]

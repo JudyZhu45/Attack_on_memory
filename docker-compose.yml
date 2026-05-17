@@ -1,0 +1,53 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agent-memory-ctf-api
+    env_file:
+      - .env
+    environment:
+      HINDSIGHT_ENDPOINT: http://hindsight:8888
+      MEM0_TELEMETRY: "False"
+    ports:
+      - "8000:8000"
+    depends_on:
+      hindsight:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: agent-memory-ctf-web
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+  hindsight:
+    image: ghcr.io/vectorize-io/hindsight:latest
+    container_name: agent-memory-ctf-hindsight
+    environment:
+      HINDSIGHT_API_LLM_API_KEY: ${OPENAI_API_KEY}
+      HINDSIGHT_API_LLM_PROVIDER: openai
+      HINDSIGHT_API_WORKER_ID: hindsight-ctf
+    ports:
+      - "8888:8888"
+      - "9999:9999"
+    volumes:
+      - hindsight_data:/home/hindsight/.pg0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  hindsight_data:
+    driver: local
