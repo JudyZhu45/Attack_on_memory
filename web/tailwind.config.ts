@@ -5,14 +5,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        panel: "#101114",
-        line: "#24272f",
-        ember: "#ff3b3b",
-        venom: "#f4b13d",
-        signal: "#29d7ff",
+        panel: "#101419",
+        line: "#26303a",
+        ember: "#38bdf8",
+        venom: "#a78bfa",
+        signal: "#34d399",
       },
       boxShadow: {
-        glow: "0 0 36px rgba(255, 59, 59, 0.18)",
+        glow: "0 0 36px rgba(56, 189, 248, 0.16)",
       },
     },
   },

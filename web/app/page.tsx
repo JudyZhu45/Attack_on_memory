@@ -83,7 +83,7 @@ export default function HomePage() {
     <Shell>
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section className="space-y-5">
-          <div className="border border-line bg-panel p-5 md:p-6">
+          <div className="rounded-2xl border border-line bg-panel p-5 md:p-6">
             <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
               <div className="max-w-3xl">
                 <div className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-ember">
@@ -95,13 +95,13 @@ export default function HomePage() {
                   Choose a live backend, attack the current defense tier, and clear each track by extracting or corrupting protected memory.
                 </p>
               </div>
-              <div className="grid min-w-full grid-cols-2 border border-line sm:min-w-[280px]">
+              <div className="grid min-w-full grid-cols-2 overflow-hidden rounded-xl border border-line sm:min-w-[280px]">
                 {(["mem0", "hindsight"] as TargetName[]).map((target) => (
                   <button
                     key={target}
                     onClick={() => setTarget(target)}
                     className={`h-11 px-4 text-sm font-semibold ${
-                      progress.selectedTarget === target ? "bg-ember text-white" : "bg-zinc-950 text-zinc-400 hover:text-zinc-100"
+                      progress.selectedTarget === target ? "bg-ember text-slate-950" : "bg-zinc-950 text-zinc-400 hover:text-zinc-100"
                     }`}
                   >
                     {target}
@@ -122,7 +122,7 @@ export default function HomePage() {
                 <button
                   key={track.id}
                   onClick={() => setActiveTrackId(track.id)}
-                  className={`border bg-panel p-5 text-left transition hover:border-zinc-500 ${
+                  className={`rounded-xl border bg-panel p-5 text-left transition hover:border-zinc-500 ${
                     active ? "border-ember/80 shadow-glow" : "border-line"
                   }`}
                 >
@@ -140,7 +140,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <section className="border border-line bg-panel p-5 md:p-6">
+            <section className="rounded-2xl border border-line bg-panel p-5 md:p-6">
               <div className="flex flex-wrap items-center gap-3">
                 <span className={`border px-2 py-1 text-xs font-semibold ${familyColor[activeTrack.family]}`}>
                   {activeTrack.family}
@@ -149,7 +149,7 @@ export default function HomePage() {
               </div>
               <h2 className="mt-5 text-3xl font-semibold text-zinc-50 md:text-4xl">{activeLevel?.title ?? "Loading challenge"}</h2>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-zinc-400">{activeLevel?.briefing ?? "Fetching live mission data..."}</p>
-              <div className="mt-6 border border-line bg-zinc-950 p-4">
+              <div className="mt-6 rounded-xl border border-line bg-zinc-950 p-4">
                 <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-zinc-300">
                   <Terminal size={16} />
                   Objective
@@ -158,18 +158,18 @@ export default function HomePage() {
               </div>
               <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="grid grid-cols-2 gap-3 text-sm sm:min-w-[260px]">
-                  <div className="border border-line bg-zinc-950 p-3">
+                  <div className="rounded-lg border border-line bg-zinc-950 p-3">
                     <div className="font-semibold text-zinc-100">{activeAttempts}</div>
                     <div className="text-zinc-500">Attempts</div>
                   </div>
-                  <div className="border border-line bg-zinc-950 p-3">
+                  <div className="rounded-lg border border-line bg-zinc-950 p-3">
                     <div className="font-semibold text-zinc-100">{activeScore}</div>
                     <div className="text-zinc-500">Best score</div>
                   </div>
                 </div>
                 <Link
                   href={activeLevel ? `/levels/${activeLevel.id}` : "#"}
-                  className="inline-flex h-12 items-center justify-center gap-2 bg-ember px-6 text-sm font-semibold text-white hover:bg-red-500"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-ember px-6 text-sm font-semibold text-slate-950 hover:bg-sky-300"
                 >
                   <Play size={17} />
                   Enter Challenge
@@ -177,7 +177,7 @@ export default function HomePage() {
               </div>
             </section>
 
-            <section className="border border-line bg-panel p-5">
+            <section className="rounded-2xl border border-line bg-panel p-5">
               <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-300">
                 <ShieldCheck size={16} />
                 Defense Ladder
@@ -192,7 +192,7 @@ export default function HomePage() {
                       key={level.id}
                       href={unlocked ? `/levels/${level.id}` : "#"}
                       aria-disabled={!unlocked}
-                      className={`flex items-center gap-3 border p-3 transition ${
+                      className={`flex items-center gap-3 rounded-lg border p-3 transition ${
                         current ? "border-ember/80 bg-ember/10" : "border-line bg-zinc-950"
                       } ${unlocked ? "hover:border-zinc-500" : "pointer-events-none opacity-50"}`}
                     >
@@ -227,7 +227,7 @@ export default function HomePage() {
                   key={level.id}
                   href={unlocked ? `/levels/${level.id}` : "#"}
                   aria-disabled={!unlocked}
-                  className={`border bg-panel p-4 transition ${
+                  className={`rounded-xl border bg-panel p-4 transition ${
                     unlocked ? "border-line hover:border-zinc-500" : "pointer-events-none border-zinc-900 opacity-45"
                   }`}
                 >
@@ -247,21 +247,21 @@ export default function HomePage() {
         </section>
 
         <aside className="space-y-4">
-          <div className="border border-line bg-panel p-5">
+          <div className="rounded-2xl border border-line bg-panel p-5">
             <div className="text-sm font-semibold text-zinc-300">Operator</div>
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="border border-line bg-zinc-950 p-3">
+              <div className="rounded-lg border border-line bg-zinc-950 p-3">
                 <div className="text-2xl font-semibold text-zinc-100">{targetProgress.completed.length}/{levels.length}</div>
                 <div className="text-xs text-zinc-500">Cleared</div>
               </div>
-              <div className="border border-line bg-zinc-950 p-3">
+              <div className="rounded-lg border border-line bg-zinc-950 p-3">
                 <div className="text-2xl font-semibold text-zinc-100">{totalScore}</div>
                 <div className="text-xs text-zinc-500">Score</div>
               </div>
             </div>
           </div>
 
-          <label className="flex cursor-pointer items-center justify-between border border-line bg-panel p-4">
+          <label className="flex cursor-pointer items-center justify-between rounded-xl border border-line bg-panel p-4">
             <span>
               <span className="block text-sm font-semibold text-zinc-100">Practice Mode</span>
               <span className="block text-xs text-zinc-500">Unlock all levels locally.</span>
@@ -270,19 +270,19 @@ export default function HomePage() {
               type="checkbox"
               checked={progress.practiceMode}
               onChange={(event) => updateProgress({ ...progress, practiceMode: event.target.checked })}
-              className="h-5 w-5 accent-red-500"
+              className="h-5 w-5 accent-sky-400"
             />
           </label>
 
           <button
             onClick={resetLocal}
-            className="flex h-11 w-full items-center justify-center gap-2 border border-line bg-zinc-950 text-sm text-zinc-300 hover:border-ember hover:text-white"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-line bg-zinc-950 text-sm text-zinc-300 hover:border-ember hover:text-white"
           >
             <RotateCcw size={16} />
             Reset Local Progress
           </button>
 
-          <Link href={levels.length ? `/levels/${levels.find((level) => isUnlocked(progress, progress.selectedTarget, level.id) && !targetProgress.completed.includes(level.id))?.id ?? "exfil-1"}` : "#"} className="flex h-12 items-center justify-center gap-2 bg-ember text-sm font-semibold uppercase tracking-[0.18em] text-white hover:bg-red-500">
+          <Link href={levels.length ? `/levels/${levels.find((level) => isUnlocked(progress, progress.selectedTarget, level.id) && !targetProgress.completed.includes(level.id))?.id ?? "exfil-1"}` : "#"} className="flex h-12 items-center justify-center gap-2 rounded-lg bg-ember text-sm font-semibold uppercase tracking-[0.18em] text-slate-950 hover:bg-sky-300">
             <Play size={17} />
             Continue
           </Link>

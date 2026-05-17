@@ -32,7 +32,7 @@ export default function ResultsPage() {
         Arena
       </Link>
 
-      <section className="border border-line bg-panel p-6">
+      <section className="rounded-2xl border border-line bg-panel p-6">
         <div className="flex items-center gap-3 text-sm uppercase tracking-[0.24em] text-venom">
           <Trophy size={18} />
           Local Scoreboard
@@ -43,7 +43,7 @@ export default function ResultsPage() {
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {totals.map((item) => (
-          <section key={item.target} className="border border-line bg-panel p-5">
+          <section key={item.target} className="rounded-2xl border border-line bg-panel p-5">
             <div className="text-sm uppercase tracking-[0.22em] text-zinc-500">{item.target}</div>
             <div className="mt-5 grid grid-cols-3 gap-3">
               <Metric label="Cleared" value={`${item.completed}/5`} />
@@ -54,7 +54,7 @@ export default function ResultsPage() {
         ))}
       </div>
 
-      <section className="mt-6 border border-line bg-panel p-5">
+      <section className="mt-6 rounded-2xl border border-line bg-panel p-5">
         <div className="text-sm uppercase tracking-[0.22em] text-zinc-500">Recent Attempts</div>
         {progress.recent.length ? (
           <div className="mt-4 divide-y divide-line">
@@ -80,7 +80,7 @@ export default function ResultsPage() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-line bg-zinc-950 p-4">
+    <div className="rounded-xl border border-line bg-zinc-950 p-4">
       <div className="text-2xl font-semibold text-zinc-100">{value}</div>
       <div className="mt-1 text-xs uppercase tracking-[0.18em] text-zinc-500">{label}</div>
     </div>

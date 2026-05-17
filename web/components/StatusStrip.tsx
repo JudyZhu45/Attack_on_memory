@@ -15,7 +15,7 @@ export function StatusStrip({
 
   return (
     <section className="grid gap-3 md:grid-cols-[1fr_2fr]">
-      <div className="border border-line bg-panel p-4">
+      <div className="rounded-xl border border-line bg-panel p-4">
         <div className="flex items-center gap-2 text-sm uppercase tracking-[0.22em] text-zinc-500">
           <Activity size={15} />
           Live Target
@@ -28,7 +28,7 @@ export function StatusStrip({
           </div>
         </div>
       </div>
-      <div className="border border-line bg-panel p-4">
+      <div className="rounded-xl border border-line bg-panel p-4">
         <div className="text-sm uppercase tracking-[0.22em] text-zinc-500">Diagnostics</div>
         {!health ? (
           <p className="mt-3 text-sm text-zinc-400">Checking backend at localhost:8000...</p>

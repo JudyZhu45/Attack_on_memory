@@ -162,11 +162,11 @@ export default function LevelPage() {
   if (clientReady && level && !unlocked) {
     return (
       <Shell>
-        <section className="mx-auto max-w-2xl border border-line bg-panel p-8 text-center">
+        <section className="mx-auto max-w-2xl rounded-2xl border border-line bg-panel p-8 text-center">
           <Lockout />
           <h1 className="mt-5 text-3xl font-semibold text-zinc-100">Level Locked</h1>
           <p className="mt-3 text-sm leading-6 text-zinc-400">Clear the previous breach or enable Practice Mode from the arena map.</p>
-          <Link href="/" className="mt-6 inline-flex h-11 items-center justify-center border border-line px-5 text-sm text-zinc-200 hover:border-zinc-500">
+          <Link href="/" className="mt-6 inline-flex h-11 items-center justify-center rounded-lg border border-line px-5 text-sm text-zinc-200 hover:border-zinc-500">
             Back to arena
           </Link>
         </section>
@@ -186,7 +186,7 @@ export default function LevelPage() {
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
         <section className="space-y-5">
-          <div className="border border-line bg-panel p-5 md:p-6">
+          <div className="rounded-2xl border border-line bg-panel p-5 md:p-6">
             <div className="flex flex-wrap items-center gap-3 text-xs font-semibold">
               <span className={`border px-2 py-1 ${familyColor[level?.family ?? ""] ?? "border-ember/70 text-ember"}`}>
                 {level?.id.toUpperCase() ?? levelId.toUpperCase()}
@@ -198,14 +198,14 @@ export default function LevelPage() {
             <p className="mt-4 max-w-3xl text-sm leading-6 text-zinc-400">{level?.briefing ?? "Fetching mission data..."}</p>
             <div className="mt-5 flex flex-wrap gap-2">
               {defenseTags(levelId).map((tag) => (
-                <span key={tag} className="border border-line bg-zinc-950 px-3 py-1 text-xs text-zinc-400">
+                <span key={tag} className="rounded-full border border-line bg-zinc-950 px-3 py-1 text-xs text-zinc-400">
                   {tag}
                 </span>
               ))}
             </div>
           </div>
 
-          <div className="border border-line bg-panel p-5">
+          <div className="rounded-2xl border border-line bg-panel p-5">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-zinc-300">
               <Target size={15} />
               Objective
@@ -213,7 +213,7 @@ export default function LevelPage() {
             <p className="text-lg text-zinc-100">{level?.objective}</p>
           </div>
 
-          <form onSubmit={onSubmit} className="border border-line bg-panel">
+          <form onSubmit={onSubmit} className="overflow-hidden rounded-2xl border border-line bg-panel">
             <div className="flex items-center justify-between border-b border-line px-5 py-4">
               <label htmlFor="prompt" className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
                 <Terminal size={16} />
@@ -230,7 +230,7 @@ export default function LevelPage() {
               maxLength={4000}
               rows={9}
               placeholder="Type the prompt you want the memory agent to process..."
-              className="mt-3 w-full resize-y border border-line bg-zinc-950 p-4 text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-ember"
+              className="mt-3 w-full resize-y rounded-xl border border-line bg-zinc-950 p-4 text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-ember"
             />
             {isExfil ? (
               <div className="mt-4">
@@ -243,7 +243,7 @@ export default function LevelPage() {
                   onChange={(event) => setSubmittedAnswer(event.target.value)}
                   maxLength={4000}
                   placeholder="Enter the recovered token here..."
-                  className="mt-3 h-12 w-full border border-line bg-zinc-950 px-4 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-ember"
+                  className="mt-3 h-12 w-full rounded-lg border border-line bg-zinc-950 px-4 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-ember"
                 />
                 <p className="mt-2 text-xs leading-5 text-zinc-500">
                   Exfiltration levels are scored from this answer field. The attack prompt is used to probe the protected memory system.
@@ -255,7 +255,7 @@ export default function LevelPage() {
               <button
                 type="submit"
                 disabled={submitting || !canSubmit}
-                className="inline-flex h-12 items-center justify-center gap-2 bg-ember px-6 text-sm font-semibold text-white hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-500"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-ember px-6 text-sm font-semibold text-slate-950 hover:bg-sky-300 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-500"
               >
                 {submitting ? <Loader2 className="animate-spin" size={17} /> : <Send size={17} />}
                 {submitting ? "Running" : "Submit Attack"}
@@ -265,7 +265,7 @@ export default function LevelPage() {
           </form>
 
           {result ? (
-            <section className={`border p-5 ${result.success ? "border-signal/70 bg-signal/10" : "border-venom/70 bg-venom/10"}`}>
+            <section className={`rounded-2xl border p-5 ${result.success ? "border-signal/70 bg-signal/10" : "border-venom/70 bg-venom/10"}`}>
               <div className="flex items-start gap-3">
                 {result.success ? <CheckCircle2 className="mt-1 text-signal" size={24} /> : <AlertTriangle className="mt-1 text-venom" size={24} />}
                 <div className="flex-1">
@@ -273,7 +273,7 @@ export default function LevelPage() {
                   <p className="mt-2 text-sm leading-6 text-zinc-300">{result.message}</p>
 
                   {result.agent_answer && (
-                    <div className="mt-4 border border-line bg-zinc-950 p-4">
+                    <div className="mt-4 rounded-xl border border-line bg-zinc-950 p-4">
                       <div className="text-xs font-semibold text-zinc-500">Memory Response</div>
                       <pre className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-zinc-100">{result.agent_answer}</pre>
                     </div>
@@ -290,7 +290,7 @@ export default function LevelPage() {
                 </div>
               </div>
               {result.success && nextLevel ? (
-                <Link href={`/levels/${nextLevel.id}`} className="mt-5 inline-flex h-11 items-center justify-center bg-signal px-5 text-sm font-semibold text-black">
+                <Link href={`/levels/${nextLevel.id}`} className="mt-5 inline-flex h-11 items-center justify-center rounded-lg bg-signal px-5 text-sm font-semibold text-black">
                   Next Level
                 </Link>
               ) : null}
@@ -300,7 +300,7 @@ export default function LevelPage() {
 
         <aside className="space-y-4">
           <StatusStrip health={health} selectedTarget={target} />
-          <div className="border border-line bg-panel p-5">
+          <div className="rounded-2xl border border-line bg-panel p-5">
             <div className="text-sm font-semibold text-zinc-300">Run State</div>
             <div className="mt-4 space-y-3 text-sm">
               <div className="flex justify-between border-b border-line pb-2">
@@ -322,7 +322,7 @@ export default function LevelPage() {
             </div>
           </div>
 
-          <div className="border border-line bg-panel p-5">
+          <div className="rounded-2xl border border-line bg-panel p-5">
             <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-300">
               <ShieldCheck size={16} />
               Track Progress
@@ -337,7 +337,7 @@ export default function LevelPage() {
                     key={item.id}
                     href={itemUnlocked ? `/levels/${item.id}` : "#"}
                     aria-disabled={!itemUnlocked}
-                    className={`flex items-center gap-3 border p-3 transition ${
+                    className={`flex items-center gap-3 rounded-lg border p-3 transition ${
                       current ? "border-ember/80 bg-ember/10" : "border-line bg-zinc-950"
                     } ${itemUnlocked ? "hover:border-zinc-500" : "pointer-events-none opacity-50"}`}
                   >
@@ -365,5 +365,5 @@ export default function LevelPage() {
 }
 
 function Lockout() {
-  return <div className="mx-auto h-16 w-16 border border-zinc-700 bg-zinc-950" />;
+  return <div className="mx-auto h-16 w-16 rounded-2xl border border-zinc-700 bg-zinc-950" />;
 }
