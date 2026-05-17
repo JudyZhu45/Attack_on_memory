@@ -9,6 +9,7 @@ import { Shell } from "@/components/Shell";
 import { StatusStrip } from "@/components/StatusStrip";
 
 const familyColor: Record<string, string> = {
+  Memorization: "border-signal/70 text-signal",
   Exfiltration: "border-ember/70 text-ember",
   Poisoning: "border-venom/70 text-venom",
   Structural: "border-signal/70 text-signal",

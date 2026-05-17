@@ -198,12 +198,12 @@ export default function LevelPage() {
               <div className="flex items-start gap-3">
                 {result.success ? <CheckCircle2 className="mt-1 text-signal" size={24} /> : <AlertTriangle className="mt-1 text-venom" size={24} />}
                 <div className="flex-1">
-                  <h2 className="text-2xl font-semibold text-zinc-100">{result.success ? "Compromised" : "Blocked"}</h2>
+                  <h2 className="text-2xl font-semibold text-zinc-100">{result.success ? "Success" : "Memory Response"}</h2>
                   <p className="mt-2 text-sm leading-6 text-zinc-300">{result.message}</p>
 
                   {result.agent_answer && (
                     <div className="mt-4 border border-line bg-zinc-950 p-4">
-                      <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">Agent Reply</div>
+                      <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">Memory Response</div>
                       <pre className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-zinc-100">{result.agent_answer}</pre>
                     </div>
                   )}
